@@ -4,7 +4,7 @@ $titles = scandir('scraped');
 
 foreach ($titles as $title){
 	
-	if(in_array($title, array('.', '..', '.DS_Store'))){
+	if(in_array($title, array('.', '..', '.DS_Store', 'renamer.rb'))){
 		continue;
 	}
 
@@ -24,7 +24,7 @@ foreach ($titles as $title){
 		$title_ident = $titleInfo[1][0];
 		$title_text = $titleInfo[2][0];
 
-		preg_match_all('/^(\d+-[\d\w]+)\s([\w\s:\'\-,\.\[\]]+)$/', $chapter, $chapterInfo);
+		preg_match_all('/^(\d+-[\d\w]+)\s([\w\s:\'\-,\.\[\]]+)$/', str_replace('’', '', $chapter), $chapterInfo);
 		if(!isset($chapterInfo[1][0]) || !isset($chapterInfo[2][0])){
 			throw new Exception("Couldn't get chapter info for $chapter\n\n" . print_r($chapterInfo));
 		}
@@ -34,6 +34,11 @@ foreach ($titles as $title){
 
 		foreach($docs as $doc){
 			if(in_array($doc, array('.', '..', '.DS_Store'))){
+				continue;
+			}
+
+			if(!preg_match('/^.*\.doc$/m', $doc)){
+				echo "Varying sub-level for $doc\n\n Skipping for now.\n\n";
 				continue;
 			}
 
