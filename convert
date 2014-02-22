@@ -24,7 +24,7 @@ foreach ($titles as $title){
 		$title_ident = $titleInfo[1][0];
 		$title_text = $titleInfo[2][0];
 
-		preg_match_all('/^(\d+-\d+)\s([\w\s]+)$/', $chapter, $chapterInfo);
+		preg_match_all('/^(\d+-\d+)\s([\w\s:\'-]+)$/', $chapter, $chapterInfo);
 		if(!isset($chapterInfo[1][0]) || !isset($chapterInfo[2][0])){
 			throw new Exception("Couldn't get chapter info for $chapter");
 		}
@@ -47,11 +47,7 @@ foreach ($titles as $title){
 
 			exec("wvware -X \"scraped/$title/$chapter/$doc\"", $output);
 			$section_text = implode("\n", $output);
-
-			echo $section_text;
 		}
-
-
 	}
 }
 
