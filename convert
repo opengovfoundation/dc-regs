@@ -50,7 +50,30 @@ foreach ($titles as $title){
 			$section_ident = $sectionInfo[1][0];
 			$section_label = $sectionInfo[2][0];
 
-			exec("wvware -X \"scraped/$title/$chapter/$doc\" > sd_xml/" . $section_ident . ".xml", $output);
+			exec("wvware -X \"scraped/$title/$chapter/$doc\"", $output);
+			$output = implode("\n", $output);
+
+			$law = simplexml_load_string('<?xml version="1.0" encoding="UTF-8"?><law></law>');
+			$structure = $law->addChild('structure');
+			
+			$unit_title = $structure->addChild('unit', $title_text);
+			$unit_title->addAttribute('label', 'title');
+			$unit_title->addAttribute('identifier', $title_ident);
+			$unit_title->addAttribute('order_by', $title_ident);
+			$unit_title->addAttribute('level', '1');
+
+			$unit_chapter = $structure->addChild('unit', $chapter_text);
+			$unit_chapter->addAttribute('label', 'chapter');
+			$unit_chapter->addAttribute('identifier', $chapter_ident);
+			$unit_chapter->addAttribute('order_by', $chapter_ident);
+			$unit_chapter->addAttribute('level', '2');
+
+			$section_number = $law->addChild('section_number', $section_ident);
+			$catch_line = $law->addChild('catch_line', $section_label);
+			$order_by = $law->addChild('order_by', $section_ident);
+			$text = $law->addChild('text', $output);
+
+			file_put_contents('sd_xml/' . $section_ident . '.xml', $law->asXML());
 		}
 	}
 }
