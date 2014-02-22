@@ -50,23 +50,9 @@ foreach ($titles as $title){
 			$section_ident = $sectionInfo[1][0];
 			$section_label = $sectionInfo[2][0];
 
-			exec("wvware -X \"scraped/$title/$chapter/$doc\"", $output);
-			$section_text = implode("\n", $output);
+			exec("wvware -X \"scraped/$title/$chapter/$doc\" > sd_xml/" . $section_ident . ".xml", $output);
 		}
 	}
 }
-
-exit;
-
-$command = "wvware -X \"$file\"";
-
-echo "Running: $command \n\n";
-
-$section_xml = exec($command, $output);
-
-$output = implode("\n", $output);
-
-file_put_contents('orig_xml/' . $ident . ".xml", $output);
-
 
 exit;
