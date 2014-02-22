@@ -2,6 +2,9 @@
 
 $titles = scandir('scraped');
 
+try{
+
+
 foreach ($titles as $title){
 	
 	if(in_array($title, array('.', '..', '.DS_Store', 'renamer.rb'))){
@@ -21,16 +24,22 @@ foreach ($titles as $title){
 			throw new Exception("Couldn't get title info for $title");
 		}
 
-		$title_ident = $titleInfo[1][0];
-		$title_text = $titleInfo[2][0];
+		$title_info = array(
+		    'path'	=> $title,
+			'ident' => $titleInfo[1][0],
+			'text'	=> $titleInfo[2][0]
+		);
 
 		preg_match_all('/^(\d+-[\d\w]+)\s([\w\s:\'\-,\.\[\]]+)$/', str_replace('’', '', $chapter), $chapterInfo);
 		if(!isset($chapterInfo[1][0]) || !isset($chapterInfo[2][0])){
 			throw new Exception("Couldn't get chapter info for $chapter\n\n" . print_r($chapterInfo));
 		}
 
-		$chapter_ident = $chapterInfo[1][0];
-		$chapter_text = $chapterInfo[2][0];
+		$chapter_info = array(
+		    'path'	=> $chapter,
+			'ident'	=> $chapterInfo[1][0],
+			'text'	=> $chapterInfo[2][0]
+		);
 
 		foreach($docs as $doc){
 			if(in_array($doc, array('.', '..', '.DS_Store'))){
@@ -38,44 +47,98 @@ foreach ($titles as $title){
 			}
 
 			if(!preg_match('/^.*\.doc$/m', $doc)){
-				echo "Varying sub-level for $doc\n\n Skipping for now.\n\n";
-				continue;
+				echo "Document not matched: $doc \n\n";
+				$subtitle = $chapter;
+				//$chapter = $doc;
+				$subtitle_info = $chapter_info;
+				
+				preg_match_all('/^(\d+-[\d\w]+)\s([\w\s]+)$/', $doc, $chapterInfo);
+				if(!isset($chapterInfo[1][0]) || !isset($chapterInfo[2][0])){
+					throw new Exception("Couldn't get chapter info for subtitle: $subtitle -> $doc");
+				}
+
+				$docs2 = scandir("scraped/$title/$subtitle/$doc");
+
+				$doc_info = array(
+				    'path'	=> $chapter,
+					'ident'	=> $chapterInfo[1][0],
+					'text'	=> $chapterInfo[2][0]
+				);
+
+				foreach($docs2 as $doc2){
+					if(in_array($doc2, array('.', '..', '.DS_Store'))){
+						continue;
+					}
+					saveSection($title_info, $subtitle_info, $doc_info, $doc2);	
+				}
+			}else{
+				saveSection($title_info, null, $chapter_info, $doc);
 			}
 
-			preg_match_all('/^(\d+-[\d\w]+)\s([\w\s\'\[\]\-,:;\."\(\)]+)\.doc$/', str_replace(array('”', '“', '’'),array('','', ''), $doc), $sectionInfo);
-			if(!isset($sectionInfo[1][0]) || !isset($sectionInfo[2][0])){
-				throw new Exception("Couldn't get section info for $doc\n\n" . print_r($sectionInfo));
-			}
-
-			$section_ident = $sectionInfo[1][0];
-			$section_label = $sectionInfo[2][0];
-
-			exec("wvware -X \"scraped/$title/$chapter/$doc\"", $output);
-			$output = implode("\n", $output);
-
-			$law = simplexml_load_string('<?xml version="1.0" encoding="UTF-8"?><law></law>');
-			$structure = $law->addChild('structure');
 			
-			$unit_title = $structure->addChild('unit', $title_text);
-			$unit_title->addAttribute('label', 'title');
-			$unit_title->addAttribute('identifier', $title_ident);
-			$unit_title->addAttribute('order_by', $title_ident);
-			$unit_title->addAttribute('level', '1');
-
-			$unit_chapter = $structure->addChild('unit', $chapter_text);
-			$unit_chapter->addAttribute('label', 'chapter');
-			$unit_chapter->addAttribute('identifier', $chapter_ident);
-			$unit_chapter->addAttribute('order_by', $chapter_ident);
-			$unit_chapter->addAttribute('level', '2');
-
-			$section_number = $law->addChild('section_number', $section_ident);
-			$catch_line = $law->addChild('catch_line', $section_label);
-			$order_by = $law->addChild('order_by', $section_ident);
-			$text = $law->addChild('text', $output);
-
-			file_put_contents('sd_xml/' . $section_ident . '.xml', $law->asXML());
 		}
 	}
+}
+}catch(Exception $e){
+	echo $e->getMessage();
+	foreach(glob('sd_xml/*') as $filename){
+		unlink($filename);
+	}
+	die();
+}
+
+function saveSection($title, $subtitle, $chapter, $doc){
+
+	preg_match_all('/^(\d+-[\d\w]+)\s([\w\s\'\[\]\-,:;\."\(\)]+)\.doc$/', str_replace(array('”', '“', '’'),array('','', ''), $doc), $sectionInfo);
+	if(!isset($sectionInfo[1][0]) || !isset($sectionInfo[2][0])){
+		throw new Exception("Couldn't get section info for $doc\n\n" . print_r($sectionInfo));
+	}
+
+	$section_ident = $sectionInfo[1][0];
+	$section_label = $sectionInfo[2][0];
+
+	if(isset($subtitle)){
+		exec("wvware -X \"scraped/" . $title['path'] . "/" . $subtitle['path'] . "/" . $chapter['path'] . "/$doc\"", $output);	
+	}else{
+		exec("wvware -X \"scraped/" . $title['path'] . "/" . $chapter['path'] . "/$doc\"", $output);	
+	}
+	
+	$output = implode("\n", $output);
+
+	$law = simplexml_load_string('<?xml version="1.0" encoding="UTF-8"?><law></law>');
+	$structure = $law->addChild('structure');
+	
+	$unit_title = $structure->addChild('unit', $title['text']);
+	$unit_title->addAttribute('label', 'title');
+	$unit_title->addAttribute('identifier', $title['ident']);
+	$unit_title->addAttribute('order_by', $title['ident']);
+	$unit_title->addAttribute('level', '1');
+
+	if(isset($subtitle)){
+		$unit_subtitle = $structure->addChild('unit', $subtitle['text']);
+		$unit_subtitle->addAttribute('label', 'subtitle');
+		$unit_subtitle->addAttribute('identifier', $subtitle['ident']);
+		$unit_subtitle->addAttribute('order_by', $subtitle['ident']);
+		$unit_subtitle->addAttribute('level', '2');
+	}
+
+	$unit_chapter = $structure->addChild('unit', $chapter['text']);
+	$unit_chapter->addAttribute('label', 'chapter');
+	$unit_chapter->addAttribute('identifier', $chapter['ident']);
+	$unit_chapter->addAttribute('order_by', $chapter['ident']);
+	if(isset($subtitle)){
+		$unit_chapter->addAttribute('level', '3');
+	}else{
+		$unit_chapter->addAttribute('level', '2');	
+	}
+	
+
+	$section_number = $law->addChild('section_number', $section_ident);
+	$catch_line = $law->addChild('catch_line', $section_label);
+	$order_by = $law->addChild('order_by', $section_ident);
+	$text = $law->addChild('text', $output);
+
+	file_put_contents('sd_xml/' . $section_ident . '.xml', $law->asXML());
 }
 
 exit;
