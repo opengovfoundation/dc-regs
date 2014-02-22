@@ -1,0 +1,26 @@
+<?php
+	
+$files = glob("*.doc");
+
+foreach($files as $file){
+
+	preg_match_all('/^(\d+-\d+)\s_\s(\d+)\s([^_]+)_\s(\d+-\d+)\s([^\.]+)\.doc$/', $file, $matches);
+
+	$ident = $matches[1][0];
+	$title_ident = $matches[2][0];
+	$title_text = $matches[3][0];
+	$chapter_ident = $matches[4][0];
+	$chapter_text = $matches[5][0];
+
+	$command = "wvware -X \"$file\"";
+	
+	echo "Running: $command \n\n";
+
+	$section_xml = exec($command, $output);
+
+	$output = implode("\n", $output);
+
+	file_put_contents('orig_xml/' . $ident . ".xml", $output);
+}
+
+exit;
