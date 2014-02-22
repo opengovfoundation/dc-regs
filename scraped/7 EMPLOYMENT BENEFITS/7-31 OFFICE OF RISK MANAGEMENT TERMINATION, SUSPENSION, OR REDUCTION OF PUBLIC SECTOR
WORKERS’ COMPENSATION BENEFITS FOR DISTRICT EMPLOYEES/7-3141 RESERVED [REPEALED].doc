@@ -1,0 +1,19 @@
+<script language=javascript>alert(' This file does not exist! ');window.location.href=('http://dcregs.dc.gov/Gateway/ChapterHome.aspx?ChapterNumber=7-31')</script>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head><title>
+	DownLoad File
+</title></head>
+<body>
+    <form name="form1" method="post" action="DownLoad.aspx?VersionID=3981673" id="form1">
+<div>
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="/wEPDwUJNzgzNDMwNTMzDxYEHgd1cmxiYWNrBSwvR2F0ZXdheS9DaGFwdGVySG9tZS5hc3B4P0NoYXB0ZXJOdW1iZXI9Ny0zMR4LVXJsUmVmZXJyZXIoKVVTeXN0ZW0uVXJpLCBTeXN0ZW0sIFZlcnNpb249Mi4wLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1iNzdhNWM1NjE5MzRlMDg5QGh0dHA6Ly9kY3JlZ3MuZGMuZ292L0dhdGV3YXkvQ2hhcHRlckhvbWUuYXNweD9DaGFwdGVyTnVtYmVyPTctMzFkZOWu8Sg7ePFV63dXoyiM/ZxXWINc" />
+</div>
+
+    <div>
+        &nbsp;</div>
+    </form>
+</body>
+</html>
