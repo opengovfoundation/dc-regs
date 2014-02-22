@@ -1,26 +1,71 @@
 <?php
+
+$titles = scandir('scraped');
+
+foreach ($titles as $title){
 	
-$files = glob("*.doc");
+	if(in_array($title, array('.', '..', '.DS_Store'))){
+		continue;
+	}
 
-foreach($files as $file){
+	$chapters = scandir("scraped/$title");
 
-	preg_match_all('/^(\d+-\d+)\s_\s(\d+)\s([^_]+)_\s(\d+-\d+)\s([^\.]+)\.doc$/', $file, $matches);
+	foreach($chapters as $chapter){
+		if(in_array($chapter, array('.', '..', '.DS_Store'))){
+			continue;
+		}
+		$docs = scandir("scraped/$title/$chapter");
 
-	$ident = $matches[1][0];
-	$title_ident = $matches[2][0];
-	$title_text = $matches[3][0];
-	$chapter_ident = $matches[4][0];
-	$chapter_text = $matches[5][0];
+		preg_match_all('/^(\d+\w?)\s([\w\s]+)$/', $title, $titleInfo);
+		if(!isset($titleInfo[1][0]) || !isset($titleInfo[2][0])){
+			throw new Exception("Couldn't get title info for $title");
+		}
 
-	$command = "wvware -X \"$file\"";
-	
-	echo "Running: $command \n\n";
+		$title_ident = $titleInfo[1][0];
+		$title_text = $titleInfo[2][0];
 
-	$section_xml = exec($command, $output);
+		preg_match_all('', $chapter, $chapterInfo);
+		if(!isset($chapterInfo[1][0] || !isset($chapterInfo[2][0]))){
+			throw new Exception("Couldn't get chapter info for $chapter");
+		}
 
-	$output = implode("\n", $output);
+		$chapter_ident = $chapterInfo[1][0];
+		$chapter_text = $chapterInfo[2][0];
 
-	file_put_contents('orig_xml/' . $ident . ".xml", $output);
+		foreach($docs as $doc){
+			if(in_array($doc, array('.', '..', '.DS_Store'))){
+				continue;
+			}
+
+			preg_match_all('/(\d+-\d+)\s([\w+])$/', $doc, $sectionInfo);
+			if(!isset($sectionInfo[1][0] || !isset($sectionInfo[2][0]))){
+			throw new Exception("Couldn't get chapter info for $doc");
+		}
+
+			$section_ident = $sectionInfo[1][0];
+			$section_label = $sectionInfo[2][0];
+
+
+			exec("wvware -X \"scraped/$title/$chapter/$doc\"", $output);
+			$section_text = implode("\n", $output);
+
+		}
+
+
+	}
 }
+
+exit;
+
+$command = "wvware -X \"$file\"";
+
+echo "Running: $command \n\n";
+
+$section_xml = exec($command, $output);
+
+$output = implode("\n", $output);
+
+file_put_contents('orig_xml/' . $ident . ".xml", $output);
+
 
 exit;
