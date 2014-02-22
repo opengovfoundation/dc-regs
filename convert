@@ -24,9 +24,9 @@ foreach ($titles as $title){
 		$title_ident = $titleInfo[1][0];
 		$title_text = $titleInfo[2][0];
 
-		preg_match_all('/^(\d+-\d+)\s([\w\s:\'-]+)$/', $chapter, $chapterInfo);
+		preg_match_all('/^(\d+-\d+)\s([\w\s:\'\-,]+)$/', $chapter, $chapterInfo);
 		if(!isset($chapterInfo[1][0]) || !isset($chapterInfo[2][0])){
-			throw new Exception("Couldn't get chapter info for $chapter");
+			throw new Exception("Couldn't get chapter info for $chapter\n\n" . print_r($chapterInfo));
 		}
 
 		$chapter_ident = $chapterInfo[1][0];
@@ -37,9 +37,10 @@ foreach ($titles as $title){
 				continue;
 			}
 
-			preg_match_all('/^(\d+-\d+)\s([\w\s\'\[\]]+)\.doc$/', $doc, $sectionInfo);
+
+			preg_match_all('/^(\d+-\d+)\s([\w\s\'\[\]\-,:;\."]+)\.doc$/', str_replace(array('”', '“'),array('',''), $doc), $sectionInfo);
 			if(!isset($sectionInfo[1][0]) || !isset($sectionInfo[2][0])){
-				throw new Exception("Couldn't get chapter info for $doc");
+				throw new Exception("Couldn't get section info for $doc\n\n" . print_r($sectionInfo));
 			}
 
 			$section_ident = $sectionInfo[1][0];
