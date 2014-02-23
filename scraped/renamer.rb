@@ -4,6 +4,7 @@ Dir.glob("**/*").each do |filename|
 	File.rename(filename, filename.sub(/ \( Rename History \)/,''))
 	File.rename(filename, filename.sub(/\n/,' '))
 	File.rename(filename, filename.sub(/\*/,''))
+	File.rename(filename, filename.sub(/\:/,'[colon]'))
 end
 rescue
 	retry
