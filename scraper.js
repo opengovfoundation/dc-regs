@@ -1,4 +1,5 @@
-/*This scraper has been designed to use CasperJS/PhantomJS to scrape the DC municipal regulations.
+/* DC Reg Scraper - Written by Keith Porcaro for Open Data Day 2014
+This scraper has been designed to use CasperJS/PhantomJS to scrape the DC municipal regulations.
 With a little tweaking, it'll happily burn through any page with large document sets. 
 
 The folder organization is an attempt to avoid problems with filename length limits. On OS X (untested elsewhere),
@@ -7,6 +8,7 @@ the file names will span multiple lines, but should still all be there.
 TO-DO: -note regulations without accompanying document.
 
 Note: If you're going to run this with multiple instances of casper, assign each instance a small piece of the links, or you'll start getting C++ errors. 
+
  */
 
 var casper = require('casper').create({   
